@@ -27,22 +27,12 @@ router.get('/login', (req, res) => {
 })
 
 // API para login
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body
-
-    const user = await UserModel.findOne({email}).lean().exec()
-    if(!user) {
-        return res.status(401).render('errors/base', {
-            error: 'User not found'
-        })
-    }
-
-    if (!isValidPassword(user, password)) {
-        return res.status(403).json({ status: 'error', error: 'Incorrect password'})
-    }
-
-    req.session.user = user
+router.post('/login', passport.authenticate('login', { failureRedirect: '/session/failLogin'}), async (req, res) => {
     res.redirect('/products')
+})
+
+router.get('/failLogin', (req, res) => {
+    res.send({ error: 'Failed!'})
 })
 
 // Cerrar Session
